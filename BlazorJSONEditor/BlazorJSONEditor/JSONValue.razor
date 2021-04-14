@@ -1,0 +1,33 @@
+﻿@using Newtonsoft.Json.Linq
+
+@switch (Value.Type)
+{
+    case JTokenType.Object:
+        <JSONObject Object=@((JObject)Value) />
+        break;
+
+    case JTokenType.Array:
+        <JSONArray Array=@((JArray)Value) />
+        break;
+
+    case JTokenType.String:
+        <JSONString String=@((string)Value) />
+        break;
+
+    case JTokenType.Null:
+        <JSONNull />
+        break;
+
+    case JTokenType.Boolean:
+        <JSONBoolean Value=@((bool)Value) />
+        break;
+
+    default:
+        <JSONUnknown Value=@((string)Value) />
+        break;
+}
+
+@code {
+    [Parameter]
+    public JToken Value { get; set; }
+}

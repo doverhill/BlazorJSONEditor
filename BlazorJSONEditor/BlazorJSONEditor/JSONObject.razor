@@ -1,0 +1,27 @@
+﻿@using Newtonsoft.Json.Linq
+
+<JSONObjectStart />
+<JSONIndent>
+    @for (var propertyIndex = 0; propertyIndex < properties.Count; propertyIndex++)
+    {
+        <JSONProperty Property=@properties[propertyIndex] />
+        @if (propertyIndex < properties.Count - 1)
+        {
+            @(",")
+        }
+        <br />
+    }
+</JSONIndent>
+<JSONObjectEnd />
+
+@code {
+    [Parameter]
+    public JObject Object { get; set; }
+
+    private List<JProperty> properties;
+
+    protected override void OnParametersSet()
+    {
+        properties = Object.Properties().ToList();
+    }
+}

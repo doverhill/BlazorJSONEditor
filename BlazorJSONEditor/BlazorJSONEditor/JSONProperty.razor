@@ -1,0 +1,9 @@
+﻿@using Newtonsoft.Json.Linq
+
+<JSONPropertyName Name=@Property.Name />
+<JSONValue Value=@Property.Value />
+
+@code {
+    [Parameter]
+    public JProperty Property { get; set; }
+}

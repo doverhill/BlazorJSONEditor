@@ -1,0 +1,25 @@
+﻿@using Newtonsoft.Json.Linq
+
+<JSONArrayStart />
+<JSONIndent>
+    @for (var arrayIndex = 0; arrayIndex < Array.Count; arrayIndex++)
+    {
+        <JSONValue Value=@Array[arrayIndex] />
+        @if (arrayIndex < Array.Count - 1)
+        {
+            @(",")
+        }
+        <br />
+    }
+</JSONIndent>
+<JSONArrayEnd />
+
+@code {
+    [Parameter]
+    public JArray Array { get; set; }
+
+    protected override void OnParametersSet()
+    {
+
+    }
+}
