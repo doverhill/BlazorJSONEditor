@@ -1,0 +1,49 @@
+﻿@if (tokens != null)
+{
+    @foreach (var token in tokens)
+    {
+        <span class=@("jsonEditor_token jsonEditor_token" + token.Type.ToString()) style=@token.Style>@token.Text</span>
+    }
+}
+
+@code
+{
+    [CascadingParameter]
+    public JSONEditor Editor { get; set; }
+
+    private List<SimpleToken> tokens;
+
+    private void HandleUpdate()
+    {
+        var json = Editor.GetJSON();
+        var textReader = new System.IO.StringReader(json);
+        var reader = new Newtonsoft.Json.JsonTextReader(textReader);
+        tokens = new List<SimpleToken>();
+        try
+        {
+            while (reader.Read())
+            {
+                if (reader.TokenType == Newtonsoft.Json.JsonToken.String)
+                {
+                    var simpleTokens = SimpleToken.CreateStringTokens((string)reader.Value, reader.LineNumber, reader.LinePosition, reader.Path, json);
+                    tokens.AddRange(simpleTokens);
+                }
+                else
+                {
+                    var simpleToken = new SimpleToken(reader.Value, reader.TokenType, reader.LineNumber, reader.LinePosition, reader.Path);
+                    tokens.Add(simpleToken);
+                }
+            }
+        }
+        catch (Exception)
+        {
+        }
+
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        Editor.OnUpdate += HandleUpdate;
+    }
+}

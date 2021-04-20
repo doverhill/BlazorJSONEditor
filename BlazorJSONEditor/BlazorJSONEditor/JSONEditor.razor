@@ -1,24 +1,44 @@
-﻿@using Newtonsoft.Json.Linq
-
-<div class="jsonEditor_main">
+﻿<div class="jsonEditor">
+    <div class="jsonEditor_sizeContainer">
+        @JSON
+        <textarea spellcheck="false" @oninput=@HandleEdit class="jsonEditor_editor">@JSON</textarea>
+    </div>
     <CascadingValue IsFixed Value=@this>
-        <JSONObject Object=@document />
+        <JSONOverlay />
     </CascadingValue>
 </div>
 
-@code {
+@code
+{
     [Parameter]
     public string JSON { get; set; }
 
-    private JObject document;
+    public event Action OnUpdate;
 
-    protected override void OnInitialized()
+    private string currentJson;
+
+    private void HandleEdit(ChangeEventArgs e)
     {
-        document = JObject.Parse(JSON);
+        currentJson = (string)e.Value;
+        OnUpdate?.Invoke();
+    }
+
+    protected override void OnParametersSet()
+    {
+        JSON = JSON.Replace("\t", "    ");
+        currentJson = JSON;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            OnUpdate?.Invoke();
+        }
     }
 
     public string GetJSON()
     {
-        return null;
+        return currentJson;
     }
 }
