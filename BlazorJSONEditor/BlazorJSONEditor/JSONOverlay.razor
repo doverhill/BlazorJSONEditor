@@ -15,7 +15,7 @@
 
     private void HandleUpdate()
     {
-        var json = Editor.GetJSON();
+        var json = Editor.GetJSON(false);
         var textReader = new System.IO.StringReader(json);
         var reader = new Newtonsoft.Json.JsonTextReader(textReader);
         tokens = new List<SimpleToken>();
@@ -23,15 +23,25 @@
         {
             while (reader.Read())
             {
-                if (reader.TokenType == Newtonsoft.Json.JsonToken.String)
+                switch (reader.TokenType)
                 {
-                    var simpleTokens = SimpleToken.CreateStringTokens((string)reader.Value, reader.LineNumber, reader.LinePosition, reader.Path, json);
-                    tokens.AddRange(simpleTokens);
-                }
-                else
-                {
-                    var simpleToken = new SimpleToken(reader.Value, reader.TokenType, reader.LineNumber, reader.LinePosition, reader.Path);
-                    tokens.Add(simpleToken);
+                    case Newtonsoft.Json.JsonToken.StartObject:
+                    case Newtonsoft.Json.JsonToken.StartArray:
+                    case Newtonsoft.Json.JsonToken.EndObject:
+                    case Newtonsoft.Json.JsonToken.EndArray:
+                    case Newtonsoft.Json.JsonToken.StartConstructor:
+                    case Newtonsoft.Json.JsonToken.EndConstructor:
+                        break;
+
+                    case Newtonsoft.Json.JsonToken.String:
+                        var simpleTokens = SimpleToken.CreateStringTokens((string)reader.Value, reader.LineNumber, reader.LinePosition, reader.Path, json);
+                        tokens.AddRange(simpleTokens);
+                        break;
+
+                    default:
+                        var simpleToken = new SimpleToken(reader.Value, reader.TokenType, reader.LineNumber, reader.LinePosition, reader.Path);
+                        tokens.Add(simpleToken);
+                        break;
                 }
             }
         }

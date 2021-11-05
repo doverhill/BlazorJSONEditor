@@ -14,7 +14,7 @@ namespace BlazorJSONEditor
 
         public static IEnumerable<SimpleToken> CreateStringTokens(string value, int lineNumber, int linePosition, string path, string json)
         {
-            var lines = value.Split("\n").ToArray();
+            var lines = value.Split("\n").Select(s => s.Replace("\"", "\\\"")).ToArray();
 
             if (lines.Length == 1)
             {

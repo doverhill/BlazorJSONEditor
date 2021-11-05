@@ -1,7 +1,7 @@
 ﻿<div class="jsonEditor">
     <div class="jsonEditor_sizeContainer">
-        @JSON
-        <textarea spellcheck="false" @oninput=@HandleEdit class="jsonEditor_editor">@JSON</textarea>
+        @baseJson
+        <textarea spellcheck="false" @oninput=@HandleEdit class="jsonEditor_editor">@baseJson</textarea>
     </div>
     <CascadingValue IsFixed Value=@this>
         <JSONOverlay />
@@ -15,6 +15,7 @@
 
     public event Action OnUpdate;
 
+    private string baseJson;
     private string currentJson;
 
     private void HandleEdit(ChangeEventArgs e)
@@ -25,8 +26,10 @@
 
     protected override void OnParametersSet()
     {
-        JSON = JSON.Replace("\t", "    ");
-        currentJson = JSON;
+        baseJson = JSON
+            .Replace("\t", "    ")
+            .Replace("\\n", "\n");
+        currentJson = baseJson;
     }
 
     protected override void OnAfterRender(bool firstRender)
@@ -37,8 +40,40 @@
         }
     }
 
-    public string GetJSON()
+    private string GetFormatted(string json)
     {
-        return currentJson;
+        try
+        {
+            var root = Newtonsoft.Json.Linq.JObject.Parse(json);
+            var stringConverter = new StringConverter();
+            //var commentConverter = new CommentConverter();
+            //var settings = new Newtonsoft.Json.JsonSerializerSettings();
+            //settings.Converters = new List<Newtonsoft.Json.JsonConverter> { stringConverter };
+            //settings.Formatting = Newtonsoft.Json.Formatting.Indented;
+
+            //return Newtonsoft.Json.JsonConvert.SerializeObject(root, settings);
+            return root.ToString(Newtonsoft.Json.Formatting.Indented, stringConverter);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    public void TryPrettify()
+    {
+        var newJson = GetFormatted(currentJson);
+        if (newJson != null)
+        {
+            baseJson = newJson;
+            currentJson = newJson;
+            StateHasChanged();
+            OnUpdate?.Invoke();
+        }
+    }
+
+    public string GetJSON(bool prettify)
+    {
+        return prettify ? GetFormatted(currentJson) : currentJson;
     }
 }
